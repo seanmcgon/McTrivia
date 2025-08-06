@@ -1,9 +1,18 @@
 import { useState } from "react";
-import { io } from "socket.io-client";
+import { Socket } from "socket.io-client";
 
-export default function Game() {
+type GameArgs = {
+  name: string;
+  code: string;
+  socket: Socket;
+};
 
-    return (
-        <div>Game!</div>
-    )
+export default function Game({ name, code, socket }: GameArgs) {
+
+  return (
+    <div>
+        <h1>Welcome {name}!</h1>
+        <h2>Game code: {code}</h2>
+    </div>
+  );
 }

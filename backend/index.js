@@ -19,9 +19,10 @@ let games = {}; // Temporary in-memory store
 io.on("connection", (socket) => {
   console.log("New connection:", socket.id);
 
-  socket.on("create_game", (callback) => {
-    const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-    games[code] = { host: socket.id, players: [], questions: [], currentQ: 0 };
+  socket.on("create_game", ({ name }, callback) => {
+    const code = Math.random().toString(36).substring(2, 7).toUpperCase();
+    console.log("Code generated: " + code);
+    games[code] = { host: socket.id, players: [{ id: socket.id, name, score: 0 }], questions: [], currentQ: 0 };
     socket.join(code);
     callback(code);
   });
