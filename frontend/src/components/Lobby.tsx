@@ -43,7 +43,6 @@ export default function Lobby({
     socket.emit(
       "join_game",
       { code, name, playerId },
-      //TODO: change the callback to provide the full list of players as well, and pass that to onjoin
       (response: JoinResponse) => {
         if (response.success) {
           onJoin(name, code, socket, playerId, false, response.players);
