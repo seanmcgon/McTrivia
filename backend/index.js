@@ -68,6 +68,44 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("next_question", async ({ code }) => {
+    const game = games[code];
+    if (game) {
+      if (game.currentQ > game.questions.length) {
+        const response = await fetch("https://the-trivia-api.com/v2/questions");
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch new questions:",
+            response.status,
+            response.statusText
+          );
+          io.to(code).emit("question_error", [response.status, response.statusText]);
+          return;
+        }
+        const newQuestions = await response.json();
+        const formattedQs = newQuestions.map((question) => {
+          return {
+            qText: question["question"]["text"],
+            correctA: question["correctAnswer"],
+            otherAs: question["incorrectAnswers"],
+          };
+        });
+        console.log(formattedQs);
+        game.questions = formattedQs;
+        game.currentQ = 0;
+      }
+    }
+    io.to(code).emit("question_served", game.questions[game.currentQ]);
+    game.currentQ++;
+  });
+
+  socket.on("start_game", ({ code }) => {
+    const game = games[code];
+    if (game) {
+      io.to(code).emit("game_started");
+    }
+  });
+
   socket.on("disconnecting", () => {
     const playerId = socketToPlayerId[socket.id];
     delete socketToPlayerId[socket.id];
