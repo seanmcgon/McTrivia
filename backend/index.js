@@ -32,11 +32,13 @@ io.on("connection", (socket) => {
           score: 0,
           connected: true,
           socketId: socket.id,
+          choice: "",
         },
       },
       questions: [],
       currentQ: 0,
       connectionCount: 1,
+      numSubmitted: 0,
     };
     socketToPlayerId[socket.id] = playerId;
 
@@ -72,26 +74,47 @@ io.on("connection", (socket) => {
     const game = games[code];
     if (game) {
       if (game.currentQ > game.questions.length) {
-        const response = await fetch("https://the-trivia-api.com/v2/questions");
-        if (!response.ok) {
-          console.error(
-            "Failed to fetch new questions:",
-            response.status,
-            response.statusText
-          );
-          io.to(code).emit("question_error", [response.status, response.statusText]);
-          return;
-        }
-        const newQuestions = await response.json();
-        const formattedQs = newQuestions.map((question) => {
-          return {
-            qText: question["question"]["text"],
-            correctA: question["correctAnswer"],
-            otherAs: question["incorrectAnswers"],
-          };
-        });
-        console.log(formattedQs);
-        game.questions = formattedQs;
+        // const response = await fetch("https://the-trivia-api.com/v2/questions");
+        // if (!response.ok) {
+        //   console.error(
+        //     "Failed to fetch new questions:",
+        //     response.status,
+        //     response.statusText
+        //   );
+        //   io.to(code).emit("question_error", [
+        //     response.status,
+        //     response.statusText,
+        //   ]);
+        //   return;
+        // }
+        // const newQuestions = await response.json();
+        // const formattedQs = newQuestions.map((question) => {
+        //   return {
+        //     qText: question["question"]["text"],
+        //     correctA: question["correctAnswer"],
+        //     otherAs: question["incorrectAnswers"],
+        //   };
+        // });
+        // console.log(formattedQs);
+        // game.questions = formattedQs;
+        game.questions = [
+          {
+            qText: "Where Does Key Lime Pie Come From?",
+            correctA: "Florida ",
+            otherAs: ["South America", "France", "Mexico"],
+          },
+          {
+            qText: "What Became America's 50th State On August 21st 1959?",
+            correctA: "Hawaii",
+            otherAs: ["Alaska", "Puerto Rico", "New Mexico"],
+          },
+          {
+            qText:
+              "Which country has the largest amount of timezones on its mainland?",
+            correctA: "Russia",
+            otherAs: ["China", "The USA", "Australia"],
+          },
+        ];
         game.currentQ = 0;
       }
     }
@@ -103,6 +126,29 @@ io.on("connection", (socket) => {
     const game = games[code];
     if (game) {
       io.to(code).emit("game_started");
+    }
+  });
+
+  socket.on("submit_answer", ({ code, id, correct, choice }) => {
+    const game = games[code];
+    if (game) {
+      if (correct) {
+        game.players[id].score++;
+      }
+
+      // Don't increment numSubmitted if player has already made a prior choice
+      if (!game.players[id].choice) {
+        game.numSubmitted++;
+      }
+
+      game.players[id].choice = choice;
+      if (game.numSubmitted === game.connectionCount) {
+        io.to(code).emit("reveal_answers", game.players);
+        game.numSubmitted = 0;
+        for (const player of Object.keys(game.players)) {
+          game.players[player].choice = "";
+        }
+      }
     }
   });
 

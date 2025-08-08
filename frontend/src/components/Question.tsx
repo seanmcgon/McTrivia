@@ -20,6 +20,7 @@ type Q = {
 type Choice = {
   text: string;
   isCorrect: boolean;
+  chosen: boolean;
 };
 
 const shuffleArray = (array: Choice[]) => {
@@ -37,8 +38,9 @@ export default function Question({
   const [question, setQuestion] = useState("");
   const [correctAns, setCorrectAns] = useState("");
   const [otherAns, setOtherAns] = useState<string[]>([]);
-  const [numAnswered, setNumAnswered] = useState(0);
   const [shuffledAnswers, setShuffledAnswers] = useState<Choice[]>([]);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [players, setPlayers] = useState(curPlayers);
 
   const getNextQ = useCallback(() => {
     socket.emit("next_question", { code });
@@ -51,8 +53,8 @@ export default function Question({
   useEffect(() => {
     // Combine correct + incorrect with metadata
     const allAnswers = [
-      { text: correctAns, isCorrect: true },
-      ...otherAns.map((text) => ({ text, isCorrect: false })),
+      { text: correctAns, isCorrect: true, chosen: false },
+      ...otherAns.map((text) => ({ text, isCorrect: false, chosen: false })),
     ];
 
     // Shuffle and store
@@ -63,24 +65,39 @@ export default function Question({
     if (!socket) return;
 
     const handleNewQuestion = (newQuestion: Q) => {
+      setShowAnswers(false);
       setQuestion(newQuestion.qText);
       setCorrectAns(newQuestion.correctA);
       setOtherAns(newQuestion.otherAs);
     };
 
+    const handleShowAnswers = (updatedPlayers: PlayersDict) => {
+      setPlayers(updatedPlayers);
+      setShowAnswers(true);
+    };
+
     socket.on("question_served", handleNewQuestion);
+    socket.on("reveal_answers", handleShowAnswers);
 
     return () => {
       socket.off("question_served", handleNewQuestion);
+      socket.off("reveal_answers", handleShowAnswers);
     };
   }, [socket]);
 
-  const handleClick = (isCorrect: boolean) => {
-    if (isCorrect) {
-      alert("Correct!");
-    } else {
-      alert("Wrong answer!");
-    }
+  const handleClick = (choice: Choice) => {
+    setShuffledAnswers((prev) =>
+      prev.map((ans) =>
+        ans.text === choice.text ? { ...ans, chosen: true } : ans
+      )
+    );
+
+    socket.emit("submit_answer", {
+      code,
+      id,
+      correct: choice.isCorrect,
+      choice: choice.text,
+    });
   };
 
   if (!question) {
@@ -89,12 +106,52 @@ export default function Question({
 
   return (
     <div>
+      <h1>{name}</h1>
       <h1>{question}</h1>
-      {shuffledAnswers.map((answer, idx) => (
-        <button key={idx} onClick={() => handleClick(answer.isCorrect)}>
-          {answer.text}
-        </button>
-      ))}
+      {shuffledAnswers.map((answer, idx) => {
+        // --- Determine styling ---
+        let className = "bg-gray-800"; // default
+        if (!showAnswers) {
+          if (answer.chosen) {
+            className = "bg-yellow-300 font-bold";
+          }
+        } else {
+          if (answer.isCorrect) {
+            className = "bg-green-300 font-bold";
+          } else if (answer.chosen) {
+            className = "bg-red-300 font-bold";
+          }
+        }
+
+        // --- Get initials for players who chose this answer ---
+        const playerInitials = Object.values(players)
+          .filter((p) => p.choice === answer.text)
+          .map((p) => p.name.charAt(0).toUpperCase());
+
+        return (
+          <button
+            key={idx}
+            onClick={() => handleClick(answer)}
+            disabled={showAnswers} // optional: lock after showing answers
+            className={`relative border rounded p-2 ${className}`}
+          >
+            {answer.text}
+
+            {showAnswers && playerInitials.length > 0 && (
+              <div className="absolute top-1 right-1 flex -space-x-1">
+                {playerInitials.map((initial, i) => (
+                  <div
+                    key={i}
+                    className="w-5 h-5 rounded-full bg-white text-xs flex items-center justify-center text-blue-700"
+                  >
+                    {initial}
+                  </div>
+                ))}
+              </div>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

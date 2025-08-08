@@ -16,6 +16,7 @@ export type Player = {
   score: number;
   connected: boolean;
   socketId: string;
+  choice: string;
 };
 
 export type PlayersDict = Record<string, Player>;
