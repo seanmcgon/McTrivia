@@ -48,9 +48,11 @@ io.on("connection", (socket) => {
 
   socket.on("join_game", ({ code, name, playerId }, callback) => {
     if (games[code]) {
+      let restart = false;
       if (games[code].players[playerId]) {
         games[code].players[playerId].connected = true;
         games[code].players[playerId].socketId = socket.id;
+        restart = true;
       } else {
         games[code].players[playerId] = {
           name: name,
@@ -65,6 +67,9 @@ io.on("connection", (socket) => {
       socket.join(code);
       io.to(code).emit("player_joined", games[code].players);
       callback({ success: true, players: games[code].players });
+      if (restart) {
+        io.to(code).emit("restart_game");
+      }
     } else {
       callback({ success: false, error: "Game not found" });
     }
@@ -73,7 +78,7 @@ io.on("connection", (socket) => {
   socket.on("next_question", async ({ code }) => {
     const game = games[code];
     if (game) {
-      if (game.currentQ > game.questions.length) {
+      if (game.currentQ >= game.questions.length) {
         // const response = await fetch("https://the-trivia-api.com/v2/questions");
         // if (!response.ok) {
         //   console.error(

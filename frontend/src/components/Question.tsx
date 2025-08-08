@@ -1,5 +1,6 @@
 import { Socket } from "socket.io-client";
 import { useState, useEffect, useCallback } from "react";
+import Leaderboard from "./Leaderboard";
 import type { PlayersDict } from "./Game";
 
 type QuestionArgs = {
@@ -41,14 +42,20 @@ export default function Question({
   const [shuffledAnswers, setShuffledAnswers] = useState<Choice[]>([]);
   const [showAnswers, setShowAnswers] = useState(false);
   const [players, setPlayers] = useState(curPlayers);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const getNextQ = useCallback(() => {
-    socket.emit("next_question", { code });
-  }, [code, socket]);
+    if (isHost) {
+      socket.emit("next_question", { code });
+    }
+  }, [code, socket, isHost]);
 
   useEffect(() => {
-    getNextQ();
-  }, [getNextQ]);
+    if (isHost) {
+      getNextQ();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // ← runs once on mount
 
   useEffect(() => {
     // Combine correct + incorrect with metadata
@@ -98,6 +105,15 @@ export default function Question({
       correct: choice.isCorrect,
       choice: choice.text,
     });
+  };
+
+  const nextClick = () => {
+    setQuestion("");
+    setCorrectAns("");
+    setOtherAns([]);
+    setShuffledAnswers([]);
+    setShowAnswers(false);
+    getNextQ();
   };
 
   if (!question) {
@@ -152,6 +168,18 @@ export default function Question({
           </button>
         );
       })}
+      {showAnswers && isHost && (
+        <div>
+          <button onClick={nextClick}>Next Question</button>
+          <button onClick={() => setShowLeaderboard(true)}>Leaderboard</button>
+        </div>
+      )}
+      {showLeaderboard && (
+        <Leaderboard
+          players={players}
+          close={() => setShowLeaderboard(false)}
+        />
+      )}
     </div>
   );
 }
