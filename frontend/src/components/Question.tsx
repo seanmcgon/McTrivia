@@ -72,6 +72,7 @@ export default function Question({
     if (!socket) return;
 
     const handleNewQuestion = (newQuestion: Q) => {
+      setShowLeaderboard(false);
       setShowAnswers(false);
       setQuestion(newQuestion.qText);
       setCorrectAns(newQuestion.correctA);
@@ -168,9 +169,9 @@ export default function Question({
           </button>
         );
       })}
-      {showAnswers && isHost && (
+      {showAnswers && (
         <div>
-          <button onClick={nextClick}>Next Question</button>
+          {isHost && <button onClick={nextClick}>Next Question</button>}
           <button onClick={() => setShowLeaderboard(true)}>Leaderboard</button>
         </div>
       )}

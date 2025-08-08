@@ -61,22 +61,50 @@ export default function Lobby({
   };
 
   if (!playerId) {
-    return <div>Loading...</div>; // Avoid rendering the app until we have the ID
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl font-semibold">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Join Trivia Game</h1>
-      <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-      <input
-        placeholder="Game Code"
-        onChange={(e) => setCode(e.target.value.toUpperCase())}
-      />
-      <button onClick={joinGame}>Join</button>
-      <p>or</p>
-      <h1>Create New Game</h1>
-      <input placeholder="Name" onChange={(e) => setName(e.target.value)} />
-      <button onClick={createGame}>Create</button>
+    <div className="flex items-center justify-center w-full max-w-11/12">
+      <div className="bg-indigo-900 rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col items-center">
+        <h1 className="text-2xl font-bold mb-6 text-white">Join Trivia Game</h1>
+        <input
+          className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+          value={name}
+        />
+        <input
+          className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+          placeholder="Game Code"
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          value={code}
+        />
+        <button
+          className="w-full bg-purple-600 text-white font-semibold py-2 rounded hover:bg-purple-700 transition mb-2"
+          onClick={joinGame}
+        >
+          Join
+        </button>
+        <p className="my-2 text-gray-300">or</p>
+        <h2 className="text-xl font-bold mb-4 text-white">Create New Game</h2>
+        <input
+          className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+          value={name}
+        />
+        <button
+          className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+          onClick={createGame}
+        >
+          Create
+        </button>
+      </div>
     </div>
   );
 }
