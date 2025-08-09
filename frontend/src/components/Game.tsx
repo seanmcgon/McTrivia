@@ -80,8 +80,8 @@ export default function Game({
 
   return (
     <div className="flex items-center justify-center w-full max-w-11/12">
-      <div className="bg-indigo-900 rounded-xl shadow-lg p-4 pb-2 w-full max-w-3xl flex flex-col items-center relative">
-        <h1 className="text-2xl font-bold mb-1 text-blue-300">
+      <div className="bg-indigo-900 rounded-xl shadow-lg p-4 pb-2 pt-10 w-full max-w-3xl flex flex-col items-center relative">
+        <h1 className="text-2xl font-bold mb-1 text-blue-300 absolute top-4 left-6">
           {name}
           {host ? " (host)" : ""}
         </h1>
@@ -101,7 +101,7 @@ export default function Game({
               {Object.values(players).map((player) => (
                 <li
                   key={player.socketId}
-                  className={`py-1 px-2 rounded transition font-medium inline-block mx-1 mb-2 ${
+                  className={`py-1 px-2 rounded-2xl transition font-medium inline-block mx-1 mb-2 ${
                     player.connected
                       ? "text-blue-600 bg-purple-100"
                       : "text-gray-400 bg-gray-100"
@@ -113,7 +113,7 @@ export default function Game({
             </ul>
             {host && (
               <button
-                className="w-1/2 bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+                className="w-1/2 bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition mb-2"
                 onClick={startGame}
               >
                 Start Game

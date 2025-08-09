@@ -56,6 +56,10 @@ export default function Question({
   }, []); // ← runs once on mount
 
   useEffect(() => {
+    setPlayers(curPlayers);
+  }, [curPlayers]);
+
+  useEffect(() => {
     // Combine correct + incorrect with metadata
     const allAnswers = [
       { text: correctAns, isCorrect: true, chosen: false },
@@ -125,7 +129,7 @@ export default function Question({
 
   return (
     <div className="flex items-center justify-center">
-      <div className="pb-0 sm:p-8 pt-2 sm:pb-4 w-full max-w-2xl flex flex-col items-center">
+      <div className="pb-0 sm:p-8 pt-4 sm:pb-4 w-full max-w-2xl flex flex-col items-center">
         <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white text-center break-words">{question}</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-6 w-full">
           {shuffledAnswers.map((answer, idx) => {
