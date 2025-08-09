@@ -76,7 +76,7 @@ export default function Lobby({
           className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
           placeholder="Name"
           onChange={(e) => setName(e.target.value)}
-          value={name}
+          // value={name}
         />
         <input
           className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -96,7 +96,7 @@ export default function Lobby({
           className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Name"
           onChange={(e) => setName(e.target.value)}
-          value={name}
+          // value={name}
         />
         <button
           className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"

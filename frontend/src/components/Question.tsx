@@ -4,7 +4,6 @@ import Leaderboard from "./Leaderboard";
 import type { PlayersDict } from "./Game";
 
 type QuestionArgs = {
-  name: string;
   socket: Socket;
   id: string;
   isHost: boolean;
@@ -29,7 +28,6 @@ const shuffleArray = (array: Choice[]) => {
 };
 
 export default function Question({
-  name,
   socket,
   id,
   isHost,
@@ -96,7 +94,7 @@ export default function Question({
   const handleClick = (choice: Choice) => {
     setShuffledAnswers((prev) =>
       prev.map((ans) =>
-        ans.text === choice.text ? { ...ans, chosen: true } : ans
+        ans.text === choice.text ? { ...ans, chosen: true } : { ...ans, chosen: false }
       )
     );
 
@@ -118,69 +116,88 @@ export default function Question({
   };
 
   if (!question) {
-    return <div>Loading...</div>; // Avoid rendering until we have the question
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-xl font-semibold">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>{name}</h1>
-      <h1>{question}</h1>
-      {shuffledAnswers.map((answer, idx) => {
-        // --- Determine styling ---
-        let className = "bg-gray-800"; // default
-        if (!showAnswers) {
-          if (answer.chosen) {
-            className = "bg-yellow-300 font-bold";
-          }
-        } else {
-          if (answer.isCorrect) {
-            className = "bg-green-300 font-bold";
-          } else if (answer.chosen) {
-            className = "bg-red-300 font-bold";
-          }
-        }
+    <div className="flex items-center justify-center">
+      <div className="pb-0 sm:p-8 pt-2 sm:pb-4 w-full max-w-2xl flex flex-col items-center">
+        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white text-center break-words">{question}</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 sm:gap-6 w-full">
+          {shuffledAnswers.map((answer, idx) => {
+            // --- Determine styling ---
+            let className = "bg-gray-800 text-white hover:bg-gray-700"; // default
+            if (!showAnswers) {
+              if (answer.chosen) {
+                className = "bg-yellow-200 text-gray-900 font-bold";
+              }
+            } else {
+              if (answer.isCorrect) {
+                className = "bg-green-300 text-gray-900 font-bold";
+              } else if (answer.chosen) {
+                className = "bg-red-300 text-gray-900 font-bold";
+              }
+            }
 
-        // --- Get initials for players who chose this answer ---
-        const playerInitials = Object.values(players)
-          .filter((p) => p.choice === answer.text)
-          .map((p) => p.name.charAt(0).toUpperCase());
+            // --- Get initials for players who chose this answer ---
+            const playerInitials = Object.values(players)
+              .filter((p) => p.choice === answer.text)
+              .map((p) => p.name.charAt(0).toUpperCase());
 
-        return (
-          <button
-            key={idx}
-            onClick={() => handleClick(answer)}
-            disabled={showAnswers} // optional: lock after showing answers
-            className={`relative border rounded p-2 ${className}`}
-          >
-            {answer.text}
+            return (
+              <button
+                key={idx}
+                onClick={() => handleClick(answer)}
+                disabled={showAnswers}
+                className={`relative border-2 border-gray-300 rounded-xl p-6 w-full h-5/12 sm:h-36 flex items-center justify-center text-lg sm:text-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300 ${className}`}
+              >
+                <span className="break-words text-center w-full">{answer.text}</span>
 
-            {showAnswers && playerInitials.length > 0 && (
-              <div className="absolute top-1 right-1 flex -space-x-1">
-                {playerInitials.map((initial, i) => (
-                  <div
-                    key={i}
-                    className="w-5 h-5 rounded-full bg-white text-xs flex items-center justify-center text-blue-700"
-                  >
-                    {initial}
+                {showAnswers && playerInitials.length > 0 && (
+                  <div className="absolute top-2 right-2 flex -space-x-1">
+                    {playerInitials.map((initial, i) => (
+                      <div
+                        key={i}
+                        className="w-7 h-7 rounded-full bg-white text-sm font-bold flex items-center justify-center text-blue-700 border border-blue-300 shadow"
+                      >
+                        {initial}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
-          </button>
-        );
-      })}
-      {showAnswers && (
-        <div>
-          {isHost && <button onClick={nextClick}>Next Question</button>}
-          <button onClick={() => setShowLeaderboard(true)}>Leaderboard</button>
+                )}
+              </button>
+            );
+          })}
         </div>
-      )}
-      {showLeaderboard && (
-        <Leaderboard
-          players={players}
-          close={() => setShowLeaderboard(false)}
-        />
-      )}
+        {showAnswers && (
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center sm:mt-4">
+            {isHost && (
+              <button
+                className="bg-blue-600 text-white font-semibold py-2 px-6 rounded hover:bg-blue-700 transition w-full sm:w-auto"
+                onClick={nextClick}
+              >
+                Next Question
+              </button>
+            )}
+            <button
+              className="bg-purple-600 text-white font-semibold py-2 px-6 rounded hover:bg-purple-700 transition w-full sm:w-auto"
+              onClick={() => setShowLeaderboard(true)}
+            >
+              Leaderboard
+            </button>
+          </div>
+        )}
+        {showLeaderboard && (
+          <Leaderboard
+            players={players}
+            close={() => setShowLeaderboard(false)}
+          />
+        )}
+      </div>
     </div>
   );
 }

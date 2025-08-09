@@ -79,34 +79,49 @@ export default function Game({
   }, [socket, setPlayers, id]);
 
   return (
-    <div>
-      <h1>
-        Welcome {name}!{host ? " (host)" : ""}
-      </h1>
-      <h2>Game code: {code}</h2>
-      {started ? (
-        <Question
-          name={name}
-          socket={socket}
-          id={id}
-          isHost={host}
-          curPlayers={players}
-          code={code}
-        />
-      ) : (
-        <div>
-          <h3>Players:</h3>
-          <ul>
-            {Object.values(players).map((player) => (
-              <li key={player.socketId}>
-                {player.name}{" "}
-                {player.connected ? "(connected)" : "(disconnected)"}
-              </li>
-            ))}
-          </ul>
-          {host && <button onClick={startGame}>Start Game</button>}
-        </div>
-      )}
+    <div className="flex items-center justify-center w-full max-w-11/12">
+      <div className="bg-indigo-900 rounded-xl shadow-lg p-4 pb-2 w-full max-w-3xl flex flex-col items-center relative">
+        <h1 className="text-2xl font-bold mb-1 text-blue-300">
+          {name}
+          {host ? " (host)" : ""}
+        </h1>
+        <h2 className="text-md font-semibold text-green-400 absolute top-4 right-6">{code}</h2>
+        {started ? (
+          <Question
+            socket={socket}
+            id={id}
+            isHost={host}
+            curPlayers={players}
+            code={code}
+          />
+        ) : (
+          <div className="w-full flex flex-col items-center">
+            <h3 className="text-md font-bold mb-2 text-gray-100">Players:</h3>
+            <ul className="mb-4">
+              {Object.values(players).map((player) => (
+                <li
+                  key={player.socketId}
+                  className={`py-1 px-2 rounded transition font-medium inline-block mx-1 mb-2 ${
+                    player.connected
+                      ? "text-blue-600 bg-purple-100"
+                      : "text-gray-400 bg-gray-100"
+                  }`}
+                >
+                  {player.name} {player.connected ? "" : "(disconnected)"}
+                </li>
+              ))}
+            </ul>
+            {host && (
+              <button
+                className="w-1/2 bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
+                onClick={startGame}
+              >
+                Start Game
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

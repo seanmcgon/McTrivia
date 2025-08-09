@@ -26,7 +26,7 @@ function App() {
 
   return (
     <div className='App bg-indigo-950 min-h-screen text-white flex flex-col items-center'>
-      <img src={logo} alt='Logo' className='m-10 w-3/4 sm:w-1/2 md:w-80 lg:w-96 max-w-full h-auto'></img>
+      <img src={logo} alt='Logo' className='m-4 w-7/12 sm:w-5/12 md:w-80 lg:w-96 max-w-full h-auto'></img>
       {inGame && socket && players
         ? <Game name={name} code={code} socket={socket} id={id} isHost={isHost} curPlayers={players}/>
         : <Lobby onJoin={onJoin} />}
