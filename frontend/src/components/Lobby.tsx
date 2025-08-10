@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import type { PlayersDict } from "./Game";
 
-const socket = io("http://localhost:3001");
+// const socket = io("http://localhost:3001");
+const socket = io();
 
 interface JoinResponse {
   success: boolean;
