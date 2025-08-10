@@ -172,6 +172,13 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("resend_question", ({ code }, callback) => {
+    const game = games[code];
+    if (game) {
+      callback(game.questions[game.currentQ - 1]);
+    }
+  });
+
   socket.on("disconnecting", () => {
     const playerId = socketToPlayerId[socket.id];
     delete socketToPlayerId[socket.id];

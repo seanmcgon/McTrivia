@@ -98,7 +98,9 @@ export default function Question({
   const handleClick = (choice: Choice) => {
     setShuffledAnswers((prev) =>
       prev.map((ans) =>
-        ans.text === choice.text ? { ...ans, chosen: true } : { ...ans, chosen: false }
+        ans.text === choice.text
+          ? { ...ans, chosen: true }
+          : { ...ans, chosen: false }
       )
     );
 
@@ -120,6 +122,14 @@ export default function Question({
   };
 
   if (!question) {
+    setInterval(() => {
+      socket.emit("resend_question", { code }, (response: Q) => {
+        setQuestion(response.qText);
+        setCorrectAns(response.correctA);
+        setOtherAns(response.otherAs);
+      });
+    }, 500);
+
     return (
       <div className="flex items-center justify-center">
         <div className="text-xl font-semibold my-8">Loading...</div>
@@ -130,7 +140,9 @@ export default function Question({
   return (
     <div className="flex items-center justify-center">
       <div className="pb-0 sm:p-8 pt-4 sm:pb-4 w-full max-w-2xl flex flex-col items-center">
-        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white text-center break-words">{question}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-white text-center break-words">
+          {question}
+        </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 w-full mb-4">
           {shuffledAnswers.map((answer, idx) => {
             // --- Determine styling ---
@@ -159,7 +171,9 @@ export default function Question({
                 disabled={showAnswers}
                 className={`relative border-2 border-gray-300 rounded-xl p-2 w-full h-auto min-h-5/12 sm:min-h-36 flex items-center justify-center text-lg sm:text-xl transition-all duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300 ${className}`}
               >
-                <span className="break-words text-center w-full">{answer.text}</span>
+                <span className="break-words text-center w-full">
+                  {answer.text}
+                </span>
 
                 {showAnswers && playerInitials.length > 0 && (
                   <div className="absolute top-2 right-2 flex -space-x-1">
