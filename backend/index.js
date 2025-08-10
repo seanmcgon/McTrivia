@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 const server = http.createServer(app);
@@ -13,6 +14,14 @@ const io = new Server(server, {
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the client build
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+// Serve frontend for all other routes
+app.get("/{*splat}", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+});
 
 let games = {}; // Temporary in-memory store
 let socketToPlayerId = {};
