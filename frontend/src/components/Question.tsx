@@ -121,15 +121,24 @@ export default function Question({
     getNextQ();
   };
 
-  if (!question) {
-    setInterval(() => {
-      socket.emit("resend_question", { code }, (response: Q) => {
-        setQuestion(response.qText);
-        setCorrectAns(response.correctA);
-        setOtherAns(response.otherAs);
-      });
-    }, 500);
+  useEffect(() => {
+    if (!question) {
+      const id = setInterval(() => {
+        if (!question) {
+          socket.emit("resend_question", { code }, (response: Q) => {
+            setQuestion(response.qText);
+            setCorrectAns(response.correctA);
+            setOtherAns(response.otherAs);
+          });
+        }
+      }, 500);
 
+      // Cleanup: clear the interval when question changes or component unmounts
+      return () => clearInterval(id);
+    }
+  }, [question, code, socket]);
+
+  if (!question) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-xl font-semibold my-8">Loading...</div>
