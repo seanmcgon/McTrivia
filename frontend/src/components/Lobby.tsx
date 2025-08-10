@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import type { PlayersDict } from "./Game";
+import { v4 as uuidv4 } from 'uuid';
 
 // const socket = io("http://localhost:3001");
 const socket = io();
@@ -13,7 +14,7 @@ interface JoinResponse {
 function getOrCreatePlayerId() {
   let id = localStorage.getItem("playerId");
   if (!id) {
-    id = crypto.randomUUID(); // Or any method you prefer
+    id = uuidv4(); // Or any method you prefer
     localStorage.setItem("playerId", id);
   }
   return id;
