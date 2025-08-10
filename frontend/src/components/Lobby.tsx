@@ -41,6 +41,10 @@ export default function Lobby({
   }, []);
 
   const joinGame = () => {
+    if (!name) {
+      alert("Please enter a name!");
+      return;
+    }
     socket.emit(
       "join_game",
       { code, name, playerId },
@@ -49,12 +53,17 @@ export default function Lobby({
           onJoin(name, code, socket, playerId, false, response.players);
         } else {
           alert("Game not found!");
+          setCode("");
         }
       }
     );
   };
 
   const createGame = () => {
+    if (!name) {
+      alert("Please enter a name!");
+      return;
+    }
     socket.emit("create_game", { name, playerId }, (newCode: string, players: PlayersDict) => {
       setCode(newCode);
       onJoin(name, newCode, socket, playerId, true, players);
@@ -72,13 +81,14 @@ export default function Lobby({
   return (
     <div className="flex items-center justify-center w-full max-w-11/12">
       <div className="bg-indigo-900 rounded-xl shadow-lg p-8 w-full max-w-md flex flex-col items-center">
-        <h1 className="text-2xl font-bold mb-6 text-white">Join Trivia Game</h1>
+        <h1 className="text-2xl font-bold mb-2 text-white">Enter Name:</h1>
         <input
-          className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="mb-8 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
           placeholder="Name"
           onChange={(e) => setName(e.target.value)}
           // value={name}
         />
+        <h1 className="text-2xl font-bold mb-2 text-white">Join Trivia Game</h1>
         <input
           className="mb-4 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
           placeholder="Game Code"
@@ -92,18 +102,11 @@ export default function Lobby({
           Join
         </button>
         <p className="my-2 text-gray-300">or</p>
-        <h2 className="text-xl font-bold mb-4 text-white">Create New Game</h2>
-        <input
-          className="mb-3 w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="Name"
-          onChange={(e) => setName(e.target.value)}
-          // value={name}
-        />
         <button
           className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
           onClick={createGame}
         >
-          Create
+          Create New Game
         </button>
       </div>
     </div>

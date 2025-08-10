@@ -121,8 +121,8 @@ export default function Question({
 
   if (!question) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-xl font-semibold">Loading...</div>
+      <div className="flex items-center justify-center">
+        <div className="text-xl font-semibold my-8">Loading...</div>
       </div>
     );
   }
