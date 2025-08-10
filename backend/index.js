@@ -88,35 +88,35 @@ io.on("connection", (socket) => {
     const game = games[code];
     if (game) {
       if (game.currentQ >= game.questions.length) {
-        // const response = await fetch("https://the-trivia-api.com/v2/questions");
-        // if (!response.ok) {
-        //   console.error(
-        //     "Failed to fetch new questions:",
-        //     response.status,
-        //     response.statusText
-        //   );
-        //   io.to(code).emit("question_error", [
-        //     response.status,
-        //     response.statusText,
-        //   ]);
-        //   return;
-        // }
-        // const newQuestions = await response.json();
-        // const formattedQs = newQuestions.map((question) => {
-        //   return {
-        //     qText: question["question"]["text"],
-        //     correctA: question["correctAnswer"],
-        //     otherAs: question["incorrectAnswers"],
-        //   };
-        // });
-        // console.log(formattedQs);
-        // game.questions = formattedQs;
-        game.questions = [
-          {
-            qText: "Where Does Key Lime Pie Come From?",
-            correctA: "Florida ",
-            otherAs: ["South America", "France", "Mexico this is a long answer option to test the sizing of the buttons aaaaaaaaaaaahhhhhhhhhh"],
-          },
+        const response = await fetch("https://the-trivia-api.com/v2/questions");
+        if (!response.ok) {
+          console.error(
+            "Failed to fetch new questions:",
+            response.status,
+            response.statusText
+          );
+          io.to(code).emit("question_error", [
+            response.status,
+            response.statusText,
+          ]);
+          return;
+        }
+        const newQuestions = await response.json();
+        const formattedQs = newQuestions.map((question) => {
+          return {
+            qText: question["question"]["text"],
+            correctA: question["correctAnswer"],
+            otherAs: question["incorrectAnswers"],
+          };
+        });
+        console.log(formattedQs);
+        game.questions = formattedQs;
+        // game.questions = [
+        //   {
+        //     qText: "Where Does Key Lime Pie Come From?",
+        //     correctA: "Florida ",
+        //     otherAs: ["South America", "France", "Mexico this is a long answer option to test the sizing of the buttons aaaaaaaaaaaahhhhhhhhhh"],
+        //   },
           // {
           //   qText: "What Became America's 50th State On August 21st 1959?",
           //   correctA: "Hawaii",
@@ -128,7 +128,7 @@ io.on("connection", (socket) => {
           //   correctA: "Russia",
           //   otherAs: ["China", "The USA", "Australia"],
           // },
-        ];
+        // ];
         game.currentQ = 0;
       }
     }
