@@ -146,9 +146,9 @@ io.on("connection", (socket) => {
   socket.on("submit_answer", ({ code, id, correct, choice }) => {
     const game = games[code];
     if (game) {
-      if (correct) {
-        game.players[id].score++;
-      }
+      // if (correct) {
+      //   game.players[id].score++;
+      // }
 
       // Don't increment numSubmitted if player has already made a prior choice
       if (!game.players[id].choice) {
@@ -157,6 +157,11 @@ io.on("connection", (socket) => {
 
       game.players[id].choice = choice;
       if (game.numSubmitted === game.connectionCount) {
+        for (const player of Object.keys(game.players)) {
+          if (game.players[player].choice === game.questions[game.currentQ - 1].correctA && game.players[player].connected) {
+            game.players[player].score++
+          }
+        }
         io.to(code).emit("reveal_answers", game.players);
         game.numSubmitted = 0;
         for (const player of Object.keys(game.players)) {
