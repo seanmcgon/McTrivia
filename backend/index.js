@@ -117,22 +117,28 @@ io.on("connection", (socket) => {
         //     correctA: "Florida ",
         //     otherAs: ["South America", "France", "Mexico this is a long answer option to test the sizing of the buttons aaaaaaaaaaaahhhhhhhhhh"],
         //   },
-          // {
-          //   qText: "What Became America's 50th State On August 21st 1959?",
-          //   correctA: "Hawaii",
-          //   otherAs: ["Alaska", "Puerto Rico", "New Mexico"],
-          // },
-          // {
-          //   qText:
-          //     "Which country has the largest amount of timezones on its mainland?",
-          //   correctA: "Russia",
-          //   otherAs: ["China", "The USA", "Australia"],
-          // },
+        // {
+        //   qText: "What Became America's 50th State On August 21st 1959?",
+        //   correctA: "Hawaii",
+        //   otherAs: ["Alaska", "Puerto Rico", "New Mexico"],
+        // },
+        // {
+        //   qText:
+        //     "Which country has the largest amount of timezones on its mainland?",
+        //   correctA: "Russia",
+        //   otherAs: ["China", "The USA", "Australia"],
+        // },
         // ];
         game.currentQ = 0;
       }
     }
     console.log("Sending question to " + game.connectionCount + " players");
+
+    // Confirm that players' choices are reset to "" for new question
+    for (const player of Object.keys(game.players)) {
+      game.players[player].choice = "";
+    }
+
     io.to(code).emit("question_served", game.questions[game.currentQ]);
     game.currentQ++;
   });
@@ -152,19 +158,30 @@ io.on("connection", (socket) => {
       // }
 
       // Don't increment numSubmitted if player has already made a prior choice
-      if (!game.players[id].choice) {
-        game.numSubmitted++;
-      }
+      // if (!game.players[id].choice) {
+      //   game.numSubmitted++;
+      // }
 
       game.players[id].choice = choice;
-      if (game.numSubmitted === game.connectionCount) {
+
+      // If every connected player had made a choice then reveal answers
+      if (
+        Object.values(game.players).every(
+          (player) =>
+            !player.connected || (player.connected && player.choice !== "")
+        )
+      ) {
         for (const player of Object.keys(game.players)) {
-          if (game.players[player].choice === game.questions[game.currentQ - 1].correctA && game.players[player].connected) {
-            game.players[player].score++
+          if (
+            game.players[player].choice ===
+              game.questions[game.currentQ - 1].correctA &&
+            game.players[player].connected
+          ) {
+            game.players[player].score++;
           }
         }
         io.to(code).emit("reveal_answers", game.players);
-        game.numSubmitted = 0;
+        // game.numSubmitted = 0;
         for (const player of Object.keys(game.players)) {
           game.players[player].choice = "";
         }
