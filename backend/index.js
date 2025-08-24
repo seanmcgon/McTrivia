@@ -34,7 +34,7 @@ const redis = new Redis({
 const recover = async () => {
   await redis.set("recovering", "1", { ex: 120 });
 
-  const keys = await redis.keys("game:*"); // gets all game keys
+  const keys = await redis.keys("game:*");
   for (const key of keys) {
     const game = await redis.get(key);
     if (!game) continue;
@@ -43,7 +43,13 @@ const recover = async () => {
       game.players[playerId].connected = false;
     }
 
-    await redis.set(key, JSON.stringify(game));
+    const ttl = await redis.ttl(key); // get current TTL in seconds
+    if (ttl > 0) {
+      await redis.set(key, JSON.stringify(game), { ex: ttl });
+    } else {
+      // fallback TTL if none exists
+      await redis.set(key, JSON.stringify(game), { ex: 7200 });
+    }
   }
 };
 recover();
