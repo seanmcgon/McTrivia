@@ -7,13 +7,14 @@ A simple little trivia game you can play with friends and family.
 - Unlimited, untimed trivia questions from [The Trivia API](https://the-trivia-api.com/) (rate limits may apply)
 - Real-time multiplayer with **Socket.IO**
 - Leaderboard to track scores
-- Reconnect to a game as long as at least one player stays connected
+- Reconnect to a game even if everyone disconnects (state persists in Redis for 2 hours)
 
 ## Tech Stack
 - **Frontend:** React + TypeScript
 - **Backend:** Node.js + Express
 - **Real-time:** Socket.IO
 - **Questions:** The Trivia API
+- **State Management:** Upstash Redis (serverless, 2-hour TTL for game state)
 
 ## Run Locally
 ```bash
