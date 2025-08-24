@@ -62,11 +62,16 @@ export default function Game({
       setStarted(false);
     };
 
+    const handleReconnect = (callback: (code: string, id: string) => void) => {
+      if (code && id) callback(code, id);
+    };
+
     socket.on("player_joined", handlePlayerJoined);
     socket.on("player_left", handlePlayerLeft);
     socket.on("new_host", handleNewHost);
     socket.on("game_started", handleGameStart);
     socket.on("restart_game", handleGameRestart);
+    socket.on("identify_yourself", handleReconnect);
 
     // Clean up listeners when component unmounts or socket changes
     return () => {
@@ -75,8 +80,9 @@ export default function Game({
       socket.off("new_host", handleNewHost);
       socket.off("game_started", handleGameStart);
       socket.off("restart_game", handleGameRestart);
+      socket.off("identify_yourself", handleReconnect);
     };
-  }, [socket, setPlayers, id]);
+  }, [socket, setPlayers, id, code]);
 
   return (
     <div className="flex items-center justify-center w-full max-w-11/12">

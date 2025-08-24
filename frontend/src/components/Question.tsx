@@ -44,7 +44,22 @@ export default function Question({
 
   const getNextQ = useCallback(() => {
     if (isHost) {
-      socket.emit("next_question", { code });
+      let confirmed = false;
+
+      const send = () => {
+        if (confirmed || !socket.connected) return;
+        socket.emit("next_question", { code });
+      };
+
+      // Retry every 5s until confirmed
+      const interval = setInterval(send, 5000);
+      send(); // initial attempt
+
+      // Listen for confirmation
+      socket.once("next_question_confirmed", () => {
+        confirmed = true;
+        clearInterval(interval);
+      });
     }
   }, [code, socket, isHost]);
 
@@ -104,11 +119,24 @@ export default function Question({
       )
     );
 
-    socket.emit("submit_answer", {
-      code,
-      id,
-      correct: choice.isCorrect,
-      choice: choice.text,
+    let confirmed = false;
+
+    const send = () => {
+      if (confirmed || !socket.connected) return;
+      socket.emit("submit_answer", { code, id, choice: choice.text });
+    };
+
+    // Retry every 5s until confirmed
+    const interval = setInterval(send, 5000);
+    send(); // initial attempt
+
+    // Listen for confirmation
+    socket.once("submit_answer_confirmed", (data) => {
+      if (data.choice === choice.text) {
+        confirmed = true;
+        clearInterval(interval);
+        // console.log("Answer confirmed!");
+      }
     });
   };
 
@@ -122,7 +150,7 @@ export default function Question({
   };
 
   useEffect(() => {
-    if (!question) {
+    if (!question && !isHost) {
       const id = setInterval(() => {
         if (!question) {
           socket.emit("resend_question", { code }, (response: Q) => {
@@ -131,12 +159,12 @@ export default function Question({
             setOtherAns(response.otherAs);
           });
         }
-      }, 500);
+      }, 1000);
 
       // Cleanup: clear the interval when question changes or component unmounts
       return () => clearInterval(id);
     }
-  }, [question, code, socket]);
+  }, [question, code, socket, isHost]);
 
   if (!question) {
     return (
